@@ -7,29 +7,26 @@ from os.path import isfile
 from sys import argv
 
 
-class Fetcher:
-  def __init__(self):
-    self.session = requests.Session()
-
-  def fetch(self, url):
-    ''' Fetch a single url '''
-    response = self.session.get(url)
-    page_number = url.split('=')[-1]
-    soup = BeautifulSoup(response.text, 'lxml')
-    error = soup.find('div', {'class': 'error-page'})
-    if error:
-      print(f'Error page: {url} does not exist')
-      return []
-    print('.', end='', flush=True)
-    return [(page_number, f"https://pitchfork.com{e['href']}") for e in soup.find_all('a', {'class': 'review__link'})]
+def fetch(args):
+  ''' Fetch a single url '''
+  url, session = args
+  response = session.get(url)
+  page_number = url.split('=')[-1]
+  soup = BeautifulSoup(response.text, 'lxml')
+  error = soup.find('div', {'class': 'error-page'})
+  if error:
+    print(f'Error page: {url} does not exist')
+    return []
+  print('.', end='', flush=True)
+  return [(page_number, f"https://pitchfork.com{e['href']}") for e in soup.find_all('a', {'class': 'review__link'})]
 
 def get_urls(start, end):
   ''' Return a list of urls from the Pitchfork reviews page '''
   urls = [f'https://pitchfork.com/reviews/albums/?page={i}' for i in range(start, end+1)]
   reviews = []
-  fetcher = Fetcher()
+  session = requests.Session()
   with ThreadPoolExecutor(max_workers=5) as executor:
-    for result in executor.map(fetcher.fetch, urls):
+    for result in executor.map(fetch, ((url, session) for url in urls)):
       reviews.extend(result)
   print()
   return reviews
