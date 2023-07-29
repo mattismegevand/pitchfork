@@ -1,6 +1,7 @@
 # Pitchfork Music Reviews Dataset
 
 This repository contains the code and dataset for scraping music reviews from Pitchfork.
+CSV file available [here](https://huggingface.co/datasets/mattismegevand/pitchfork).
 
 ## Dataset Overview
 
